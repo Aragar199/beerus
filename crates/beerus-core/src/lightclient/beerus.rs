@@ -304,13 +304,11 @@ impl BeerusLightClient {
             .read()
             .await
             .starknet_last_proven_block()
+            .await?
+            .as_u64();
+        self.starknet_lightclient
+            .get_storage_at(contract_address, storage_key, last_block)
             .await
-            .unwrap();
-        let storage = self
-            .starknet_lightclient
-            .get_storage_at(contract_address, storage_key, last_block.as_u64())
-            .await?;
-        Ok(storage)
     }
 
     /// Call starknet contract view.
@@ -347,8 +345,7 @@ impl BeerusLightClient {
             .as_u64();
 
         // Call the StarkNet light client.
-        let call = self.starknet_lightclient.call(opts, last_block).await?;
-        Ok(call)
+        self.starknet_lightclient.call(opts, last_block).await
     }
 
     /// Estimate the fee for a given StarkNet transaction
@@ -368,11 +365,9 @@ impl BeerusLightClient {
         block_id: &BlockId,
     ) -> Result<FeeEstimate> {
         // Call the StarkNet light client.
-        let fee = self
-            .starknet_lightclient
+        self.starknet_lightclient
             .estimate_fee(request, block_id)
-            .await?;
-        Ok(fee)
+            .await
     }
 
     /// Get the nonce at a given address.
@@ -395,11 +390,9 @@ impl BeerusLightClient {
             .await?
             .as_u64();
 
-        let nonce = self
-            .starknet_lightclient
+        self.starknet_lightclient
             .get_nonce(last_block, address)
-            .await?;
-        Ok(nonce)
+            .await
     }
 
     /// Return the timestamp at the time cancelL1ToL2Message was called with a message matching 'msg_hash'.
